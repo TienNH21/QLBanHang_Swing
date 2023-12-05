@@ -157,17 +157,13 @@ public class MauSacRepository {
         int paramIndex = 0;
         ArrayList<MauSac> ds = new ArrayList<>();
         
-        String sql = "SELECT * FROM MauSac ";
+        String sql = "SELECT * FROM MauSac WHERE TrangThai = ? ";
         
         if (keyword.length() > 0) {
-            sql += " WHERE (Ma LIKE ? OR Ten LIKE ?) ";
-        }
-        
-        if (trangThai != -1) {
-            sql += (sql.contains("WHERE") ? " AND " : " WHERE ") + " TrangThai = ? ";
+            sql += " AND (Ma LIKE ? OR Ten LIKE ?) ";
         }
             
-        sql += " ORDER BY ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        sql += " ORDER BY ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ";
         try {
             PreparedStatement ps = this.conn.prepareStatement(sql);
         

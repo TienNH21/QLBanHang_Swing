@@ -1,10 +1,55 @@
 package views;
 
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import models.KichThuoc;
+import repositories.KichThuocRepository;
+
 public class QuanLyKichThuoc extends javax.swing.JFrame {
+    
+    private KichThuocRepository kichThuocRepo = new KichThuocRepository();
+    private int page = 1;
+    private int limit = 5;
 
     public QuanLyKichThuoc() {
         initComponents();
         this.setLocationRelativeTo(null);
+    }
+    
+    private KichThuoc getFormData()
+    {
+        int id = this.lblId.getText().equals("-") ? 0 : Integer.parseInt(this.lblId.getText());
+        String ten = this.txtTen.getText().trim();
+        String ma = this.txtMa.getText().trim();
+        
+        if (ten.equals("") || ma.equals("")) {
+            JOptionPane.showMessageDialog(this, "Vui lòng điền đầy đủ thông tin");
+            return null;
+        }
+        int trangThai = this.rdoActive.isSelected() == true ? 1 : 0;
+        KichThuoc ms = new  KichThuoc(id, ma, ten, trangThai);
+        
+        return ms;
+    }
+    
+    public void loadTable(ArrayList<KichThuoc> ds)
+    {
+        DefaultTableModel dtm = (DefaultTableModel) this.tblSize.getModel();
+        dtm.setRowCount(0);
+        for (KichThuoc kt: ds) {
+            Object[] row = {
+                kt.getId(),
+                kt.getMa(),
+                kt.getTen(),
+                kt.getTrangThai() == 1 ? "Hoạt động" : "Dừng hoạt động"
+            };
+            
+            dtm.addRow(row);
+        }
+    
     }
 
     @SuppressWarnings("unchecked")
@@ -21,12 +66,12 @@ public class QuanLyKichThuoc extends javax.swing.JFrame {
         jLabel5 = new javax.swing.JLabel();
         rdoActive = new javax.swing.JRadioButton();
         txtMa = new javax.swing.JTextField();
-        jLabel6 = new javax.swing.JLabel();
+        lblId = new javax.swing.JLabel();
         txtTen = new javax.swing.JTextField();
         rdoInactive = new javax.swing.JRadioButton();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
+        btnSua = new javax.swing.JButton();
+        btnThem = new javax.swing.JButton();
+        btnClear = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -54,18 +99,34 @@ public class QuanLyKichThuoc extends javax.swing.JFrame {
         jLabel5.setText("Trạng thái");
 
         groupRdoForm.add(rdoActive);
+        rdoActive.setSelected(true);
         rdoActive.setText("Hoạt động");
 
-        jLabel6.setText("-");
+        lblId.setText("-");
 
         groupRdoForm.add(rdoInactive);
         rdoInactive.setText("Dừng hoạt động");
 
-        jButton2.setText("Sửa");
+        btnSua.setText("Sửa");
+        btnSua.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSuaActionPerformed(evt);
+            }
+        });
 
-        jButton3.setText("Thêm");
+        btnThem.setText("Thêm");
+        btnThem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnThemActionPerformed(evt);
+            }
+        });
 
-        jButton4.setText("Làm mới");
+        btnClear.setText("Làm mới");
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -80,7 +141,7 @@ public class QuanLyKichThuoc extends javax.swing.JFrame {
                             .addComponent(jLabel3))
                         .addGap(57, 57, 57)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(lblId, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(txtMa, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE))
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel2Layout.createSequentialGroup()
@@ -97,11 +158,11 @@ public class QuanLyKichThuoc extends javax.swing.JFrame {
                                 .addComponent(rdoInactive))
                             .addComponent(txtTen, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jButton3)
+                        .addComponent(btnThem)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton2)
+                        .addComponent(btnSua)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton4)))
+                        .addComponent(btnClear)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
@@ -112,7 +173,7 @@ public class QuanLyKichThuoc extends javax.swing.JFrame {
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel2)
-                            .addComponent(jLabel6))
+                            .addComponent(lblId))
                         .addGap(12, 12, 12))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -128,9 +189,9 @@ public class QuanLyKichThuoc extends javax.swing.JFrame {
                         .addComponent(rdoInactive)))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton3)
-                    .addComponent(jButton2)
-                    .addComponent(jButton4))
+                    .addComponent(btnThem)
+                    .addComponent(btnSua)
+                    .addComponent(btnClear))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -168,21 +229,48 @@ public class QuanLyKichThuoc extends javax.swing.JFrame {
         txtSearch.setToolTipText("Nhập Tên/Mã");
 
         groupRdoSearch.add(rdoActiveFilter);
+        rdoActiveFilter.setSelected(true);
         rdoActiveFilter.setText("Hoạt động");
 
         groupRdoSearch.add(rdoInactiveFilter);
         rdoInactiveFilter.setText("Dừng hoạt động");
 
         btnSearch.setText("Tìm kiếm");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
 
         btnNext.setText(">");
+        btnNext.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNextActionPerformed(evt);
+            }
+        });
 
         lblPage.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblPage.setText("0");
+        lblPage.setText("1");
+        lblPage.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                lblPagePropertyChange(evt);
+            }
+        });
 
         btnBack.setText("<");
+        btnBack.setEnabled(false);
+        btnBack.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBackActionPerformed(evt);
+            }
+        });
 
         btnClearSearch.setText("Làm mới");
+        btnClearSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearSearchActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -288,28 +376,128 @@ public class QuanLyKichThuoc extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void lblPagePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_lblPagePropertyChange
+        String keyword = this.txtSearch.getText().trim();
+        int trangThai = this.rdoActiveFilter.isSelected() ? 1 : 0;
+        ArrayList<KichThuoc> ds = this.kichThuocRepo.searchAndPaging(this.page, this.limit, keyword, trangThai);
+        this.loadTable(ds);
+        
+        int totalPage = this.kichThuocRepo.countPage(page, limit, keyword, trangThai);
+        this.btnNext.setEnabled(totalPage != this.page);
+        this.btnBack.setEnabled(this.page > 1);
+    }//GEN-LAST:event_lblPagePropertyChange
 
+    private void btnNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNextActionPerformed
+        this.page++;
+        this.lblPage.setText(this.page + "");
+    }//GEN-LAST:event_btnNextActionPerformed
+
+    private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+        this.page--;
+        this.lblPage.setText(this.page + "");
+        if (this.page == 1) {
+            this.btnBack.setEnabled(false);
+        } else {
+            this.btnBack.setEnabled(true);
+        }
+    }//GEN-LAST:event_btnBackActionPerformed
+
+    private void btnClearSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearSearchActionPerformed
+        this.clearSearch();
+    }//GEN-LAST:event_btnClearSearchActionPerformed
+
+    private void clearSearch()
+    {
+        this.page = 1;
+        String keyword = "";
+        this.lblPage.setText(this.page + "");
+        this.txtSearch.setText(keyword);
+        this.rdoActiveFilter.setSelected(true);
+        int trangThai = this.rdoActiveFilter.isSelected() ? 1 : 0;
+
+        ArrayList<KichThuoc> ds = this.kichThuocRepo.searchAndPaging(this.page, this.limit, keyword, trangThai);
+        this.loadTable(ds);
+        
+        int totalPage = this.kichThuocRepo.countPage(page, limit, keyword, trangThai);
+        this.btnBack.setEnabled(false);
+        this.btnNext.setEnabled(this.page != totalPage);
+    }
+    
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        this.page = 1;
+        this.lblPage.setText(this.page + "");
+        
+        String keyword = this.txtSearch.getText().trim();
+        int trangThai = this.rdoActiveFilter.isSelected() ? 1 : 0;
+        ArrayList<KichThuoc> ds = this.kichThuocRepo.searchAndPaging(this.page, this.limit, keyword, trangThai);
+        this.loadTable(ds);
+        
+        int totalPage = this.kichThuocRepo.countPage(page, limit, keyword, trangThai);
+        this.btnBack.setEnabled(false);
+        this.btnNext.setEnabled(this.page != totalPage);
+    }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void btnThemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThemActionPerformed
+        KichThuoc kt = this.getFormData();
+        if (kt == null) return ;
+        
+        try {
+            this.kichThuocRepo.create(kt);
+            this.clearSearch();
+            JOptionPane.showMessageDialog(this, "Thêm mới thành công");
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Đã xảy ra lỗi");
+        }
+    }//GEN-LAST:event_btnThemActionPerformed
+
+    private void btnSuaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSuaActionPerformed
+        KichThuoc kt = this.getFormData();
+        if (kt == null) return ;
+        
+        try {
+            this.kichThuocRepo.update(kt);
+            this.clearSearch();
+            JOptionPane.showMessageDialog(this, "Cập nhật thành công");
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Đã xảy ra lỗi");
+        }
+    }//GEN-LAST:event_btnSuaActionPerformed
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        this.clearForm();
+    }//GEN-LAST:event_btnClearActionPerformed
+
+    private void clearForm()
+    {
+        this.txtMa.setText("");
+        this.txtTen.setText("");
+        this.lblId.setText("-");
+        this.rdoActive.setSelected(true);
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBack;
+    private javax.swing.JButton btnClear;
     private javax.swing.JButton btnClearSearch;
     private javax.swing.JButton btnNext;
     private javax.swing.JButton btnSearch;
+    private javax.swing.JButton btnSua;
+    private javax.swing.JButton btnThem;
     private javax.swing.ButtonGroup groupRdoForm;
     private javax.swing.ButtonGroup groupRdoSearch;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lblId;
     private javax.swing.JLabel lblPage;
     private javax.swing.JRadioButton rdoActive;
     private javax.swing.JRadioButton rdoActiveFilter;
