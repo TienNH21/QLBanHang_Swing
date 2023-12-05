@@ -1,10 +1,45 @@
 package views;
 
+import java.util.ArrayList;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import models.MauSac;
+import repositories.MauSacRepository;
+
 public class QuanLyMauSac extends javax.swing.JFrame {
+    
+    private MauSacRepository msRepo;
+    private int limit = 5;
+    private int page = 1;
+    private int totalPage = 0;
+    private int searchTrangThai = 1;
+    private String searchKeyword = "";
 
     public QuanLyMauSac() {
         initComponents();
         this.setLocationRelativeTo(null);
+        
+        this.msRepo = new MauSacRepository();
+        ArrayList<MauSac> ds = this.msRepo.searchAndPaging(page, limit, searchKeyword, searchTrangThai);
+        this.loadTable(ds);
+        this.lblPage.setText(this.page + "");
+    }
+    
+    public void loadTable(ArrayList<MauSac> ds)
+    {
+        DefaultTableModel dtm = (DefaultTableModel) this.tblMauSac.getModel();
+        dtm.setRowCount(0);
+        for (MauSac ms: ds) {
+            Object[] row = {
+                ms.getId(),
+                ms.getMa(),
+                ms.getTen(),
+                ms.getTrangThai() == 1 ? "Hoạt động" : "Dừng hoạt động"
+            };
+            
+            dtm.addRow(row);
+        }
+    
     }
 
     @SuppressWarnings("unchecked")
@@ -59,10 +94,25 @@ public class QuanLyMauSac extends javax.swing.JFrame {
         rdoInactive.setText("Dừng hoạt động");
 
         btnThem.setText("Thêm");
+        btnThem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnThemActionPerformed(evt);
+            }
+        });
 
         btnSua.setText("Sửa");
+        btnSua.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSuaActionPerformed(evt);
+            }
+        });
 
         btnClear.setText("Làm mới");
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
 
         jLabel5.setText("Mã");
 
@@ -152,6 +202,11 @@ public class QuanLyMauSac extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        tblMauSac.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblMauSacMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tblMauSac);
         if (tblMauSac.getColumnModel().getColumnCount() > 0) {
             tblMauSac.getColumnModel().getColumn(0).setResizable(false);
@@ -161,20 +216,60 @@ public class QuanLyMauSac extends javax.swing.JFrame {
         }
 
         btnBack.setText("<");
+        btnBack.setEnabled(false);
+        btnBack.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBackActionPerformed(evt);
+            }
+        });
 
         btnNext.setText(">");
+        btnNext.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNextActionPerformed(evt);
+            }
+        });
 
         lblPage.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblPage.setText("0");
 
         txtTenSearch.setToolTipText("Nhập tên hoặc mã");
+        txtTenSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtTenSearchActionPerformed(evt);
+            }
+        });
+        txtTenSearch.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtTenSearchKeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtTenSearchKeyTyped(evt);
+            }
+        });
 
         btnSearch.setText("Tìm kiếm");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
 
         btnGrSttSearch.add(rdoActiveSearch);
+        rdoActiveSearch.setSelected(true);
         rdoActiveSearch.setText("Hoạt động");
+        rdoActiveSearch.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                rdoActiveSearchItemStateChanged(evt);
+            }
+        });
 
         btnClearSearch.setText("Làm mới");
+        btnClearSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearSearchActionPerformed(evt);
+            }
+        });
 
         btnGrSttSearch.add(rdoInactiveSearch);
         rdoInactiveSearch.setText("Dừng hoạt động");
@@ -215,24 +310,19 @@ public class QuanLyMauSac extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtTenSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnSearch))
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(rdoActiveSearch)
-                            .addComponent(rdoInactiveSearch))
-                        .addGap(633, 633, 633))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnClearSearch)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 281, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(btnNext)
-                            .addComponent(btnBack)
-                            .addComponent(lblPage))
-                        .addGap(314, 314, 314))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnClearSearch)
+                    .addComponent(rdoActiveSearch)
+                    .addComponent(rdoInactiveSearch))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 281, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnNext)
+                    .addComponent(btnBack)
+                    .addComponent(lblPage))
+                .addGap(326, 326, 326))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -260,9 +350,162 @@ public class QuanLyMauSac extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void txtMaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtMaActionPerformed
-        // TODO add your handling code here:
+        //
     }//GEN-LAST:event_txtMaActionPerformed
 
+    private void btnNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNextActionPerformed
+        this.totalPage = this.msRepo.countPage(limit, searchKeyword, searchTrangThai);
+        
+        if (this.page + 1 <= totalPage) {
+            this.page++;
+            this.lblPage.setText(this.page + "");
+            ArrayList<MauSac> ds = this.msRepo.searchAndPaging(page, limit, searchKeyword, searchTrangThai);
+            this.loadTable(ds);
+        }
+        
+        if (this.page == totalPage) {
+            this.btnNext.setEnabled(false);
+        } else if (this.page  + 1 < totalPage) {
+            this.btnNext.setEnabled(true);
+        }
+        
+        if (this.page < 1) {
+            this.btnBack.setEnabled(false);
+        } else {
+            this.btnBack.setEnabled(true);
+        }
+    }//GEN-LAST:event_btnNextActionPerformed
+
+    private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+        this.totalPage = this.msRepo.countPage(limit, searchKeyword, searchTrangThai);
+        
+        if (this.page - 1 >= 1) {
+            this.page--;
+            this.lblPage.setText(this.page + "");
+            ArrayList<MauSac> ds = this.msRepo.searchAndPaging(page, limit, searchKeyword, searchTrangThai);
+            this.loadTable(ds);
+        }
+        
+        if (this.page == totalPage) {
+            this.btnNext.setEnabled(false);
+        } else if (this.page + 1 <= totalPage) {
+            this.btnNext.setEnabled(true);
+        }
+        
+        if (this.page <= 1) {
+            this.btnBack.setEnabled(false);
+        } else {
+            this.btnBack.setEnabled(true);
+        }
+    }//GEN-LAST:event_btnBackActionPerformed
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        this.clearForm();
+    }//GEN-LAST:event_btnClearActionPerformed
+
+    private void btnThemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThemActionPerformed
+        MauSac ms = this.getFormData();
+        if (ms == null) return ;
+        
+        try {
+            this.msRepo.create(ms);
+            JOptionPane.showMessageDialog(this, "Thêm mới thành công");
+            this.loadTable(this.msRepo.paging(page, limit));
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Thêm mới thất bại");
+        }
+    }//GEN-LAST:event_btnThemActionPerformed
+
+    private void btnSuaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSuaActionPerformed
+        MauSac ms = this.getFormData();
+        if (ms == null) return ;
+        
+        try {
+            this.msRepo.update(ms);
+            JOptionPane.showMessageDialog(this, "Cập nhật thành công");
+            this.loadTable(this.msRepo.paging(page, limit));
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Cập nhật thất bại");
+        }
+    }//GEN-LAST:event_btnSuaActionPerformed
+
+    private void tblMauSacMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblMauSacMouseClicked
+        int row = this.tblMauSac.getSelectedRow();
+        if (row == -1) {
+            return ;
+        }
+        
+        this.txtID.setText(this.tblMauSac.getValueAt(row, 0).toString());
+        this.txtMa.setText(this.tblMauSac.getValueAt(row, 1).toString());
+        this.txtTen.setText(this.tblMauSac.getValueAt(row, 2).toString());
+        
+        if (this.tblMauSac.getValueAt(row, 3).toString().equals("Hoạt động")) {
+            this.rdoActive.setSelected(true);
+        } else {
+            this.rdoInactive.setSelected(true);
+        }
+    }//GEN-LAST:event_tblMauSacMouseClicked
+
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        this.page = 1;
+        this.lblPage.setText(this.page + "");
+        ArrayList<MauSac> ds = this.msRepo.searchAndPaging(page, limit, searchKeyword, searchTrangThai);
+        this.loadTable(ds);
+    }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void txtTenSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTenSearchActionPerformed
+        //
+    }//GEN-LAST:event_txtTenSearchActionPerformed
+
+    private void txtTenSearchKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTenSearchKeyTyped
+        // 
+    }//GEN-LAST:event_txtTenSearchKeyTyped
+
+    private void txtTenSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTenSearchKeyReleased
+        this.searchKeyword = this.txtTenSearch.getText().trim();
+    }//GEN-LAST:event_txtTenSearchKeyReleased
+
+    private void rdoActiveSearchItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_rdoActiveSearchItemStateChanged
+        this.searchTrangThai = this.rdoActiveSearch.isSelected() ? 1 : 0;
+    }//GEN-LAST:event_rdoActiveSearchItemStateChanged
+
+    private void btnClearSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearSearchActionPerformed
+        this.txtTenSearch.setText("");
+        this.rdoActiveSearch.setSelected(true);
+        this.searchTrangThai = -1;
+        this.searchKeyword = "";
+        
+        this.lblPage.setText(this.page + "");
+        
+        this.loadTable(this.msRepo.searchAndPaging(page, limit, searchKeyword, searchTrangThai));
+    }//GEN-LAST:event_btnClearSearchActionPerformed
+
+    private MauSac getFormData()
+    {
+        int id = this.txtID.getText().equals("") ? 0 : Integer.parseInt(this.txtID.getText());
+        String ten = this.txtTen.getText().trim();
+        String ma = this.txtMa.getText().trim();
+        
+        if (ten.equals("") || ma.equals("")) {
+            JOptionPane.showMessageDialog(this, "Vui lòng điền đầy đủ thông tin");
+            return null;
+        }
+        int trangThai = this.rdoActive.isSelected() == true ? 1 : 0;
+        MauSac ms = new  MauSac(id, ma, ten, trangThai);
+        
+        return ms;
+    }
+    
+    private void clearForm()
+    {
+        this.txtID.setText("");
+        this.txtMa.setText("");
+        this.txtTen.setText("");
+        this.rdoActive.setSelected(true);
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBack;
     private javax.swing.JButton btnClear;
