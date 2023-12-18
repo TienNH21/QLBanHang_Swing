@@ -1,10 +1,42 @@
 package views;
 
+import java.util.ArrayList;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import models.MauSac;
+import repositories.MauSacRepository;
+
 public class QuanLyMauSac extends javax.swing.JFrame {
+    private MauSacRepository msRepo;
+    private int page = 1;
+    private int limit = 20;
 
     public QuanLyMauSac() {
         initComponents();
         this.setLocationRelativeTo(null);
+        this.msRepo = new MauSacRepository();
+        this.lblPage.setText(this.page + "");
+        this.loadTable();
+    }
+    
+    private void loadTable()
+    {
+        String keyword = this.txtTenSearch.getText().trim();
+        int trangThai = this.rdoActiveSearch.isSelected() ? 1 : 0;
+
+        ArrayList<MauSac> ds = this.msRepo.searchAndPaging(keyword, trangThai, this.page, this.limit);
+        DefaultTableModel dtm = (DefaultTableModel) this.tblMauSac.getModel();
+        dtm.setRowCount(0);
+        for (MauSac ms : ds) {
+            Object[] row = {
+                ms.getId(),
+                ms.getMa(),
+                ms.getTen(),
+                ms.getTrangThai() == 1 ? "Hoạt động" : "Dừng hoạt động",
+            };
+            
+            dtm.addRow(row);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -26,6 +58,7 @@ public class QuanLyMauSac extends javax.swing.JFrame {
         btnClear = new javax.swing.JButton();
         jLabel5 = new javax.swing.JLabel();
         txtMa = new javax.swing.JTextField();
+        btnXoa = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblMauSac = new javax.swing.JTable();
@@ -59,16 +92,38 @@ public class QuanLyMauSac extends javax.swing.JFrame {
         rdoInactive.setText("Dừng hoạt động");
 
         btnThem.setText("Thêm");
+        btnThem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnThemActionPerformed(evt);
+            }
+        });
 
         btnSua.setText("Sửa");
+        btnSua.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSuaActionPerformed(evt);
+            }
+        });
 
         btnClear.setText("Làm mới");
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
 
         jLabel5.setText("Mã");
 
         txtMa.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtMaActionPerformed(evt);
+            }
+        });
+
+        btnXoa.setText("Xóa");
+        btnXoa.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnXoaActionPerformed(evt);
             }
         });
 
@@ -90,7 +145,9 @@ public class QuanLyMauSac extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(btnSua)
                         .addGap(18, 18, 18)
-                        .addComponent(btnClear))
+                        .addComponent(btnClear)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnXoa))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1)
@@ -101,7 +158,7 @@ public class QuanLyMauSac extends javax.swing.JFrame {
                             .addComponent(txtTen)
                             .addComponent(txtID)
                             .addComponent(txtMa, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE))))
-                .addContainerGap(55, Short.MAX_VALUE))
+                .addContainerGap(43, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -127,7 +184,8 @@ public class QuanLyMauSac extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnThem)
                     .addComponent(btnSua)
-                    .addComponent(btnClear))
+                    .addComponent(btnClear)
+                    .addComponent(btnXoa))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -152,6 +210,11 @@ public class QuanLyMauSac extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        tblMauSac.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblMauSacMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tblMauSac);
         if (tblMauSac.getColumnModel().getColumnCount() > 0) {
             tblMauSac.getColumnModel().getColumn(0).setResizable(false);
@@ -161,8 +224,19 @@ public class QuanLyMauSac extends javax.swing.JFrame {
         }
 
         btnBack.setText("<");
+        btnBack.setEnabled(false);
+        btnBack.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBackActionPerformed(evt);
+            }
+        });
 
         btnNext.setText(">");
+        btnNext.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNextActionPerformed(evt);
+            }
+        });
 
         lblPage.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblPage.setText("0");
@@ -170,11 +244,22 @@ public class QuanLyMauSac extends javax.swing.JFrame {
         txtTenSearch.setToolTipText("Nhập tên hoặc mã");
 
         btnSearch.setText("Tìm kiếm");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
 
         btnGrSttSearch.add(rdoActiveSearch);
+        rdoActiveSearch.setSelected(true);
         rdoActiveSearch.setText("Hoạt động");
 
         btnClearSearch.setText("Làm mới");
+        btnClearSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearSearchActionPerformed(evt);
+            }
+        });
 
         btnGrSttSearch.add(rdoInactiveSearch);
         rdoInactiveSearch.setText("Dừng hoạt động");
@@ -200,7 +285,7 @@ public class QuanLyMauSac extends javax.swing.JFrame {
                                 .addComponent(rdoActiveSearch)
                                 .addGap(18, 18, 18)
                                 .addComponent(rdoInactiveSearch)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 30, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(btnClearSearch)
                             .addComponent(btnSearch))
@@ -215,24 +300,19 @@ public class QuanLyMauSac extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtTenSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnSearch))
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(rdoActiveSearch)
-                            .addComponent(rdoInactiveSearch))
-                        .addGap(633, 633, 633))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnClearSearch)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 281, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(btnNext)
-                            .addComponent(btnBack)
-                            .addComponent(lblPage))
-                        .addGap(314, 314, 314))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnClearSearch)
+                    .addComponent(rdoActiveSearch)
+                    .addComponent(rdoInactiveSearch))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 281, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnNext)
+                    .addComponent(btnBack)
+                    .addComponent(lblPage))
+                .addGap(320, 320, 320))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -241,9 +321,9 @@ public class QuanLyMauSac extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -263,6 +343,149 @@ public class QuanLyMauSac extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtMaActionPerformed
 
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        this.clearForm();
+    }//GEN-LAST:event_btnClearActionPerformed
+
+    private void tblMauSacMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblMauSacMouseClicked
+        System.out.println("Clicked!");
+        int viTri = this.tblMauSac.getSelectedRow();
+        if (viTri == -1) {
+            return ;
+        }
+        
+        String idStr = this.tblMauSac.getValueAt(viTri, 0).toString();
+        String ma = this.tblMauSac.getValueAt(viTri, 1).toString();
+        String ten = this.tblMauSac.getValueAt(viTri, 2).toString();
+        String trangThaiStr = this.tblMauSac.getValueAt(viTri, 3).toString();
+        
+        this.txtID.setText(idStr);
+        this.txtMa.setText(ma);
+        this.txtTen.setText(ten);
+        if (trangThaiStr.equals("Hoạt động")) {
+            this.rdoActive.setSelected(true);
+        } else {
+            this.rdoInactive.setSelected(true);
+        }
+    }//GEN-LAST:event_tblMauSacMouseClicked
+
+    private void btnXoaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnXoaActionPerformed
+        int viTri = this.tblMauSac.getSelectedRow();
+        if (viTri == -1) {
+            JOptionPane.showMessageDialog(this, "Chọn 1 dòng trước khi xóa");
+            return ;
+        }
+        
+        int confirm = JOptionPane.showConfirmDialog(this, "Bạn có muốn xóa không?");
+        if (confirm != JOptionPane.YES_OPTION) {
+            return ;
+        }
+        
+        String idStr = this.tblMauSac.getValueAt(viTri, 0).toString();
+        int id = Integer.parseInt(idStr);
+        this.msRepo.delete(id);
+        JOptionPane.showMessageDialog(this, "Xóa thành công");
+        this.loadTable();
+        this.clearForm();
+    }//GEN-LAST:event_btnXoaActionPerformed
+
+    private void btnThemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThemActionPerformed
+        MauSac ms = getFormData();
+        if (ms == null) return ;
+        this.msRepo.create(ms);
+        this.clearForm();
+        this.loadTable();
+        JOptionPane.showMessageDialog(this, "Thêm mới thành công");
+    }//GEN-LAST:event_btnThemActionPerformed
+
+    private MauSac getFormData()
+    {
+        String idStr = this.txtID.getText().trim();
+        int id = idStr.length() == 0 ? -1 : Integer.parseInt(idStr);
+        String ma = this.txtMa.getText().trim();
+        String ten = this.txtTen.getText().trim();
+        int trangThai;
+        if (this.rdoActive.isSelected() == true) {
+            trangThai = 1;
+        } else {
+            trangThai = 0;
+        }
+        
+        if (ma.length() == 0 || ten.length() == 0) {
+            JOptionPane.showMessageDialog(this, "Không được để trống");
+            return null;
+        }
+        
+        MauSac ms = new MauSac(id, ma, ten, trangThai);
+        return ms;
+    }
+    
+    private void btnSuaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSuaActionPerformed
+        int row = this.tblMauSac.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Chọn 1 dòng để sửa");
+            return ;
+        }
+        
+        MauSac ms = this.getFormData();
+        if (ms == null) {
+            return;
+        }
+        
+        this.msRepo.update(ms);
+        this.clearForm();
+        this.loadTable();
+        JOptionPane.showMessageDialog(this, "Cập nhật thành công");
+    }//GEN-LAST:event_btnSuaActionPerformed
+
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        this.loadTable();
+    }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void btnClearSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearSearchActionPerformed
+        this.txtTenSearch.setText("");
+        this.rdoActiveSearch.setSelected(true);
+        this.loadTable();
+    }//GEN-LAST:event_btnClearSearchActionPerformed
+
+    private void btnNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNextActionPerformed
+        this.page++;
+        this.pageChange();
+    }//GEN-LAST:event_btnNextActionPerformed
+
+    private void pageChange()
+    {
+        this.lblPage.setText(this.page + "");
+        this.loadTable();
+        
+        if (this.page == 1) {
+            this.btnBack.setEnabled(false);
+        } else {
+            this.btnBack.setEnabled(true);
+        }
+        
+        if (this.tblMauSac.getRowCount() < 20) {
+            this.btnNext.setEnabled(false);
+        } else {
+            this.btnNext.setEnabled(true);
+        }
+        
+    }
+    
+    private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+        // TODO add your handling code here:
+        this.page--;
+        this.pageChange();
+    }//GEN-LAST:event_btnBackActionPerformed
+
+    private void clearForm()
+    {
+        this.txtID.setText("");
+        this.txtMa.setText("");
+        this.txtTen.setText("");
+        this.rdoActive.setSelected(true);
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBack;
     private javax.swing.JButton btnClear;
@@ -273,6 +496,7 @@ public class QuanLyMauSac extends javax.swing.JFrame {
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnSua;
     private javax.swing.JButton btnThem;
+    private javax.swing.JButton btnXoa;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

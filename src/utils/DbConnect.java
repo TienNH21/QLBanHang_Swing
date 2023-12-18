@@ -20,7 +20,7 @@ public class DbConnect {
             if (conn == null || conn.isClosed()) {
                 Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
                 String dbUser = "sa", dbPass = "Aa@123456",
-                    dbUrl = "jdbc:sqlserver://localhost:1433;databaseName=su22b2_sof203;encrypt=true;trustServerCertificate=true;";
+                    dbUrl = "jdbc:sqlserver://localhost:1433;databaseName=SOF203;encrypt=true;trustServerCertificate=true;";
 
                 conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
                 System.out.println("Kết nối thành công");
